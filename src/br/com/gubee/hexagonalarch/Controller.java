@@ -10,7 +10,12 @@ public class Controller {
     public static void main(String[] args) {
         ScheduledExecutorService controller = Executors.newSingleThreadScheduledExecutor();
         var notificationUseCase = new PoolingUseCaseNotification();
-        var notificationUseCaseProxy = TransactionHandler.createProxy(notificationUseCase);
+
+        //Dynamic Proxy
+        var notificationUseCaseDynamicProxy = TransactionHandler.createProxy(notificationUseCase);
+
+        //Proxy Pattern
+        var notificationUseCaseProxy = new PoolingUseCaseNotificationProxy(notificationUseCase);
 
         NotificationFactory emailPresenter = new EmailFactory();
         NotificationFactory whatsAppPresenter = new WhatsAppFactory();
@@ -23,7 +28,14 @@ public class Controller {
         controller.scheduleAtFixedRate(() -> {
             var nextPos = Math.abs(new Random().nextInt()) % 3;
 
+            //Dynamic Proxy
+            notificationUseCaseDynamicProxy.notifyEveryHour(UUID.randomUUID().toString(), notifications[nextPos]);
+
+            System.out.println();
+
+            //Proxy Pattern
             notificationUseCaseProxy.notifyEveryHour(UUID.randomUUID().toString(), notifications[nextPos]);
+
             System.out.println();
         }, 1, 1, TimeUnit.SECONDS);
     }
